@@ -141,7 +141,7 @@ class DjangoRepository(Repository[TAbstractRoot, Filters[TCriteria]]):
         return Success(instance)
 
 
-class InMemoryRepository(Repository[TAbstractRoot, Filters[TCriteria]]):
+class InMemoryRepository(Repository[TAbstractRoot, TCriteria]):
     """
     Works as an in-memory collection adapted to work with django pagination.
     Useful for testing purposes.
@@ -156,16 +156,35 @@ class InMemoryRepository(Repository[TAbstractRoot, Filters[TCriteria]]):
     def __len__(self):
         return len(self._instances)
     
+    def _clean_criteria(self, criteria: TCriteria) -> dict:
+        """
+        Optional tool to convert criteria to 'safe' filters dict.
+        """
+        filters = criteria.to_dict()
+        filters.pop('order', None) # Ensure ordering not present at filtering step
+        filters = { k: v for k, v in filters.items() if v is not None } # Ignore unset filters
+        return filters
+    
     def _matches(self, instance: TAbstractRoot, filter_expr, filter_value) -> bool:
         try:
             suffix_based_filters = {
+                # Orm level
                 '__lt': operator.lt,
                 '__gt': operator.gt,
                 '__lte': operator.le,
                 '__gte': operator.ge,
                 '__eq': operator.eq,
                 '__exact': operator.eq,
-                '__in': operator.contains
+                '__in': operator.contains,
+                # Top (Criteria) level
+                '_max': operator.le,
+                '_emax': operator.lt,
+                '_min': operator.ge,
+                '_emin': operator.gt,
+                '_after': operator.gt,
+                '_iafter': operator.ge,
+                '_before': operator.lt,
+                '_ibefore': operator.le,
             }
             
             for suffix, op in suffix_based_filters.items():
@@ -186,6 +205,17 @@ class InMemoryRepository(Repository[TAbstractRoot, Filters[TCriteria]]):
             )
             return False
     
+    def _paginate(self, criteria: TCriteria, pagination: Pagination, filtered: "InMemoryRepository") -> list[TAbstractRoot]:
+        
+        if isinstance(pagination, CursorPagination):
+            pagination.ordering = criteria.order or pagination.ordering
+        else:
+            filtered = filtered.order_by(*criteria.order)
+        
+        paginated = pagination.paginate_queryset(filtered)
+        
+        return paginated
+    
     def filter(self, **filter_values):
         filters = lambda instance: all(
             self._matches(instance, filter_name, filter_value) for filter_name, filter_value in filter_values.items()
@@ -203,12 +233,13 @@ class InMemoryRepository(Repository[TAbstractRoot, Filters[TCriteria]]):
             result = sorted(result, key=ordering_field_value, reverse=reverse)
         return InMemoryRepository(result)
     
-    def get(self, criteria: Filters[TCriteria], for_update: bool = False) -> Result[TAbstractRoot, NotFoundError]:
+    def get(self, criteria: TCriteria, for_update: bool = False) -> Result[TAbstractRoot, NotFoundError]:
         
         if not criteria.data:
             return Failure(NotFoundError())
         
-        instances = self.filter(**criteria.expressions_values)
+        filters = self._clean_criteria(criteria)
+        instances = self.filter(**filters)
         
         if not instances:
             return Failure(NotFoundError())
@@ -217,22 +248,15 @@ class InMemoryRepository(Repository[TAbstractRoot, Filters[TCriteria]]):
     
     def get_by_id(self, id: str, for_update: bool = False) -> Result[TAbstractRoot, NotFoundError]:
         try:
-            instance = next(filter(lambda instance: instance.id == id, self._instances))
+            instance = next(instance for instance in self._instances if instance.id == id)
             return Success(instance)
         except StopIteration:
             return Failure(NotFoundError())
     
-    def find(self, criteria: Filters[TCriteria], pagination: Pagination) -> Result[list[TAbstractRoot], NotFoundError | Error]:
-        
-        filtered = self.filter(**criteria.expressions_values)
-        
-        if isinstance(pagination, CursorPagination):
-            pagination.ordering = criteria.values.order or pagination.ordering
-        else:
-            filtered = filtered.order_by(*criteria.values.order)
-        
-        paginated = pagination.paginate_queryset(filtered)
-        
+    def find(self, criteria: TCriteria, pagination: Pagination) -> Result[list[TAbstractRoot], NotFoundError | Error]:
+        filters = self._clean_criteria(criteria)
+        filtered = self.filter(**filters)
+        paginated = self._paginate(criteria, pagination, filtered)
         return Success(paginated)
     
     def store(self, instance: TAbstractRoot) -> Result[TAbstractRoot, Error]:
