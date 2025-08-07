@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Virtual environment
+venv/
+env/
+.env/
+
+# IDE-specific files
+.idea/
+.vscode/
+*.swp
+*.bak
+*.swo
+
+# Database files
+*.sqlite3
+db.sqlite3
+
+# Media and static files (if served locally in dev)
+media/
+static_collected/
+static_files/
+
+# Log files
+*.log
+
+# Sensitive configuration files (e.g., local settings)
+local_settings.py
+settings_local.py
+*.env
+
+# Operating System files
+.DS_Store
+Thumbs.db
