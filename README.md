@@ -6,6 +6,10 @@ A Django-based backend following Domain-Driven Design (DDD) principles for the B
 
 This backend is structured following Domain-Driven Design principles with clear separation of concerns:
 
+### 📊 Class Analysis Diagram
+
+For a visual representation of the system architecture and class relationships, see the [Class Analysis Diagram](documents/blacar_v2_class_analysis_diagram/renders/diagram.png).
+
 ```
 blacar/                      # Django project root
 ├── startup/                 # Domain layer (bounded contexts, DDD)
