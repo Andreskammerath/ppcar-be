@@ -8,7 +8,9 @@ This backend is structured following Domain-Driven Design principles with clear 
 
 ### 📊 Class Analysis Diagram
 
-For a visual representation of the system architecture and class relationships, see the [Class Analysis Diagram](documents/blacar_v2_class_analysis_diagram/renders/diagram.png).
+Blacar Domain
+
+![Class Analysis Diagram](documents/blacar_v2_class_analysis_diagram/renders/diagram.png)
 
 ```
 blacar/                      # Django project root
