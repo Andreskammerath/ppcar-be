@@ -10,7 +10,7 @@ This backend is structured following Domain-Driven Design principles with clear 
 
 Blacar Domain
 
-![Class Analysis Diagram](documents/blacar_v2_class_analysis_diagram/renders/diagram.png)
+![Class Analysis Diagram](documents/blacar_v2_class_analysis_diagram/renders/diagram.jpg)
 
 ```
 blacar/                      # Django project root
