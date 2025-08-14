@@ -16,6 +16,7 @@ dependencies = [
     "drf-spectacular>=0.28.0,<0.29.0",
     "requests>=2.32.4,<3.0.0",
     "dj-rest-auth[with-social]>=7.0.1",
+    "drf-standardized-errors>=0.15.0",
 ]
 
 [build-system]

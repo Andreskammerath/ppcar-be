@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'rest_framework',
     'rest_framework.authtoken',
+    'drf_standardized_errors',
     'django_filters',
     'allauth',
     'allauth.account',
@@ -167,6 +168,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'EXCEPTION_HANDLER': 'drf_standardized_errors.handler.exception_handler',
 }
 
 SPECTACULAR_SETTINGS = {
@@ -187,7 +189,7 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-ACCOUNT_ADAPTER = 'api.auth.adapters.AccountAdapter'
+ACCOUNT_ADAPTER = 'startup.accounts.adapters.AccountAdapter'
 #ACCOUNT_SEND_SIGNUP_CONFIRMATION_MAIL = False # Desables default confirmation behavior
 
 warnings.filterwarnings("ignore", message=".*EMAIL_REQUIRED is deprecated.*")

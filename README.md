@@ -566,7 +566,7 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-ACCOUNT_ADAPTER = 'api.auth.adapters.AccountAdapter'
+ACCOUNT_ADAPTER = 'startup.accounts.adapters.AccountAdapter'
 ```
 
 ## 🔗 API Documentation

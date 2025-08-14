@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from returns.result import safe, Result, Success
+from returns.result import Result, Success, Failure
+from startup.shared.exceptions import ValidationError
 from startup.shared.models import AbstractRoot
 from startup.accounts.managers import UserManager
 
@@ -20,27 +21,31 @@ class User(AbstractRoot, AbstractUser):
         super().__init__(*args, **kwargs)
     
     @classmethod
-    @safe(exceptions=(ValueError,))
-    def create(cls, email, password = None) -> Result[AbstractUser, ValueError]:
-        new_user = cls.objects._create_user_object(
-            username="(empty)", # ignored as we removed it
-            email=email,
-            password=password,
-            is_staff=False,
-            is_superuser=False
-        )
-        new_user.save() # TODO: Handle this with repository at app/features layer
-        return Success(new_user)
+    def create(cls, email: str, password: str = None) -> Result[AbstractUser, ValidationError]:
+        try:
+            new_user = cls.objects._create_user_object(
+                username="(empty)", # ignored as we removed it
+                email=email.strip().lower(),
+                password=password,
+                is_staff=False,
+                is_superuser=False
+            )
+            return Success(new_user)
+        except ValueError as e:
+            msg = str(e)
+            return Failure(ValidationError(msg))
     
     @classmethod
-    @safe(exceptions=(ValueError,))
-    def create_superuser(cls, email, password = None) -> Result[AbstractUser, ValueError]:
-        new_user = cls.objects._create_user_object(
-            username="(empty)", # ignored as we removed it
-            email=email,
-            password=password,
-            is_staff=True,
-            is_superuser=True
-        )
-        new_user.save() # TODO: Handle this with repository at app/features layer
-        return Success(new_user)
+    def create_superuser(cls, email: str, password: str = None) -> Result[AbstractUser, ValidationError]:
+        try:
+            new_user = cls.objects._create_user_object(
+                username="(empty)", # ignored as we removed it
+                email=email.strip().lower(),
+                password=password,
+                is_staff=True,
+                is_superuser=True
+            )
+            return Success(new_user)
+        except ValueError as e:
+            msg = str(e)
+            return Failure(ValidationError(msg))
