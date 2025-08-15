@@ -158,15 +158,12 @@ AUTH_USER_MODEL = 'startup.User'
 DOMAIN_EVENTS_BROKER = "startup.shared.events.DjangoSignalDomainEventBroker"
 
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_standardized_errors.openapi.AutoSchema',
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'PAGE_SIZE': 10,
     'DEFAULT_PAGINATION_CLASS': 'startup.shared.repository.PageNumberPagination',
+    'DEFAULT_SCHEMA_CLASS': 'drf_standardized_errors.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
     ],
     'EXCEPTION_HANDLER': 'drf_standardized_errors.handler.exception_handler',
 }
